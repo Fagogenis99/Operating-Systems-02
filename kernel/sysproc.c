@@ -6,6 +6,40 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "pstat.h" // added for pstat struct
+
+uint64
+sys_getpinfo(void)
+{
+  uint64 pstat_addr;
+  struct pstat stat;
+  struct proc *p;
+  extern struct proc proc[NPROC];
+  int i = 0;
+
+  argaddr(0, &pstat_addr); // get the user pointer argument
+
+  for (p=proc; p<&proc[NPROC]; p++) { // iterate through process table
+    acquire(&p->lock);
+    if (p->state != UNUSED) {
+      stat.inuse[i] = 1;
+      stat.pid[i] = p->pid;
+      stat.priority[i] = p->priority; // added for priority
+      stat.state[i] = p->state;
+      stat.ticks_used[i] = p->ticks_used; // added for ticks_used
+      stat.ticks_waiting[i] = p->ticks_waiting; // added for ticks_waiting
+    } else {
+      stat.inuse[i] = 0;
+    }
+    release(&p->lock);
+    i++;
+  }
+  if (copyout(myproc()->pagetable, pstat_addr, (char *)&stat, sizeof(stat)) < 0) {
+    return -1;
+  }
+  return 0;
+
+}
 
 uint64
 sys_exit(void)
