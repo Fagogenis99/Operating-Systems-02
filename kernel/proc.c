@@ -125,6 +125,12 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  // MLPQ
+  p->priority = 0; // highest priority level
+  p->ticks_waiting = 0; // ticks spent waiting in the current queue
+  p->ticks_used = 0; // ticks used in the current queue
+  //
+  
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
