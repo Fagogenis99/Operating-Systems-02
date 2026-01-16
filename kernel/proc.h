@@ -83,6 +83,13 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
 struct proc {
+
+  // MLPQ
+  int priority; // process priority level
+  int ticks_waiting; // ticks spent waiting in the current queue
+  int ticks_used; // ticks used in the current queue
+  //
+  
   struct spinlock lock;
 
   // p->lock must be held when using these:
