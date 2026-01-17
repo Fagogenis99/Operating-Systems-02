@@ -29,6 +29,21 @@ trapinithart(void)
   w_stvec((uint64)kernelvec);
 }
 
+////// MLPQ
+int limits[4]={4, 8, 16, 32};  // limits for each queue level
+void
+check_time(struct proc *p)
+{
+  p->ticks_used++;
+  if (p->ticks_used >= limits[p->priority]){ // time slice used up for current level
+    if (p->priority < 3){
+      p->priority++; // demote to lower priority level
+    }
+    p->ticks_used = 0;
+  }
+}
+//////
+
 //
 // handle an interrupt, exception, or system call from user space.
 // called from, and returns to, trampoline.S
@@ -81,8 +96,10 @@ usertrap(void)
     kexit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
+  if(which_dev == 2){
+    check_time(p); /// MLPQ
     yield();
+  }
 
   prepare_return();
 
@@ -152,8 +169,10 @@ kerneltrap()
   }
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2 && myproc() != 0)
+  if(which_dev == 2 && myproc() != 0){
+    check_time(myproc()); /// MLPQ
     yield();
+  }
 
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
