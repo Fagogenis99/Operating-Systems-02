@@ -469,6 +469,38 @@ scheduler(void)
   }
 }*/
 void
+update_time(void)
+{
+  struct proc *p;
+  int limits[4]={4, 8, 16, 32};  // limits for each queue level
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if (p->state == RUNNABLE){ // process is waiting to run
+      p->ticks_waiting++;
+
+      if (p->priority>0){
+        int limit = 10*limits[p->priority]; // waiting limit for promotion
+
+        if (p->ticks_waiting >= limit){
+          p->priority--; // promote to higher priority level
+          p->ticks_waiting = 0;
+          p->ticks_used = 0;
+        }
+      }
+    }
+    else if(p->state == RUNNING){ // process is currently running
+      p->ticks_waiting = 0; // reset waiting ticks
+    }
+    release(&p->lock);
+  }
+}
+
+
+
+
+
+void
 scheduler(void)
 {
   struct proc *p;

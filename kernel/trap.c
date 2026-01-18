@@ -6,10 +6,12 @@
 #include "proc.h"
 #include "defs.h"
 
+
 struct spinlock tickslock;
 uint ticks;
 
 extern char trampoline[], uservec[];
+extern void update_time(void); // MLPQ
 
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
@@ -98,6 +100,7 @@ usertrap(void)
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2){
     check_time(p); /// MLPQ
+    update_time(); // MLPQ
     yield();
   }
 
@@ -171,6 +174,7 @@ kerneltrap()
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2 && myproc() != 0){
     check_time(myproc()); /// MLPQ
+    update_time(); // MLPQ
     yield();
   }
 
