@@ -28,6 +28,14 @@ sys_getpinfo(void)
       stat.state[i] = p->state;
       stat.ticks_used[i] = p->ticks_used; // added for ticks_used
       stat.ticks_waiting[i] = p->ticks_waiting; // added for ticks_waiting
+
+      stat.size[i] = p->sz;
+      if (p->parent) {
+        stat.ppid[i] = p->parent->pid;
+      } else {
+        stat.ppid[i] = 0; // no parent
+      }
+      safestrcpy(stat.name[i], p->name, sizeof(p->name));
     } else {
       stat.inuse[i] = 0;
     }

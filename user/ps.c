@@ -10,10 +10,10 @@ int main(int argc, char *argv[]){ //
         exit(1);
     }
 
-    printf("PID\tPRIORITY\tSTATE\tTICKS_USED\tTICKS_WAITING\n");
+    printf("PID\tPPID\tNAME\tPRIORITY\tSTATE\tTICKS_USED\tTICKS_WAITING\n");
     for (int i=0; i<NPROC; i++){ // printing process info
         if (stat.inuse[i]){
-            printf("%d\t%d\t\t%d\t%d\t\t%d\n", stat.pid[i], stat.priority[i], stat.state[i], stat.ticks_used[i], stat.ticks_waiting[i]);
+            printf("%d\t%d\t%s\t%d\t\t%d\t%d\t\t%d\n", stat.pid[i], stat.ppid[i], stat.name[i], stat.priority[i], stat.state[i], stat.ticks_used[i], stat.ticks_waiting[i]);
         }
     }
     exit(0);

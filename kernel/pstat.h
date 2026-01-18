@@ -10,6 +10,10 @@ struct pstat{
     int state[NPROC]; // the state of each process
     int ticks_used[NPROC]; // ticks used at current level
     int ticks_waiting[NPROC]; // ticks spent waiting in the current queue
+
+    int ppid[NPROC]; // parent PID of each process
+    uint64 size[NPROC]; // size of process memory
+    char name[NPROC][16]; // name of each process
 };
 
 #endif // _PSTAT_H_
