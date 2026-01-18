@@ -427,7 +427,8 @@ kwait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-void
+
+/*void
 scheduler(void)
 {
   struct proc *p;
@@ -463,6 +464,45 @@ scheduler(void)
     }
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
+      asm volatile("wfi");
+    }
+  }
+}*/
+void
+scheduler(void)
+{
+  struct proc *p;
+  struct cpu *c = mycpu();
+
+  c->proc = 0;
+  for(;;){ //enable interrupts
+    intr_on();
+    // intr_off();
+
+    int flag = 0;
+    //MLFQ loop
+    for (int lvl=0; lvl<4; lvl++){
+      int flag2 = 0;
+      for (p=proc; p<&proc[NPROC]; p++){
+        acquire(&p->lock);
+        if((p->state==RUNNABLE) && (p->priority==lvl)){
+          flag=1;
+          flag2=1;
+          // Switch to chosen process
+          p->state = RUNNING;
+          c->proc = p;
+          swtch(&c->context, &p->context); // switch to process
+          c->proc = 0;
+        }
+        release(&p->lock); // release process lock
+      }
+      if (flag2){
+        lvl=-1; // restart from highest priority level
+      }
+    }
+    if (flag == 0) {
+      // nothing to run; stop running on this core until an interrupt.
+      intr_on();
       asm volatile("wfi");
     }
   }
